@@ -1,0 +1,12 @@
+tables built so far:
+- role
+- staff assignments
+- staff 
+- branch
+- course 
+- student
+- module
+- emergency contact
+- session feedback --
+- session
+- room
