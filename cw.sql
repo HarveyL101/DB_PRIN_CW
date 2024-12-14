@@ -192,6 +192,17 @@ CREATE TABLE room (
         'Tutorial Session'
 
     ) NOT NULL,
-    facilities TEXT   
+    facilities TEXT  
+     
 );
 
+
+
+
+
+-- -------------------------
+-- Functions Library
+-- -------------------------
+
+-- create duration field using update on functions
+-- attending within room will use function to select student_id where 
