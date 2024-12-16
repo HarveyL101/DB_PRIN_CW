@@ -196,8 +196,25 @@ CREATE TABLE room (
      
 );
 
+-- ---------------------------
+-- Table structure for module
+-- ---------------------------
 
+DROP TABLE
+    IF EXISTS session;
 
+CREATE TABLE session (
+    session SERIAL UNIQUE NOT NULL,
+    module_id INT NOT NULL,
+    staff_id INT NOT NULL,
+    room_id INT NOT NULL,
+    date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    FOREIGN KEY module_id REFERENCES module (module_id),
+    FOREIGN KEY staff_id REFERENCES staff (staff_id),
+    FOREIGN KEY room_id REFERENCES room (room_id)
+);
 
 
 -- -------------------------
