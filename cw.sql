@@ -2,8 +2,8 @@
 -- Creates and connects to database named "cw_1"
 -- -------------------------------
 
-IF EXISTS "cw_1"
-    DELETE DATABASE "cw_1";
+DROP DATABASE
+    IF EXISTS "cw_1";
 
 CREATE DATABASE "cw_1";
 
@@ -17,7 +17,7 @@ DROP TABLE
     IF EXISTS branch CASCADE;
 
 CREATE TABLE branch (
-    branch_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
+    branch_id SERIAL PRIMARY KEY NOT NULL,
     address VARCHAR(50) NOT NULL,
     region VARCHAR(50) NOT NULL, 
     capacity INT NOT NULL,
@@ -32,7 +32,7 @@ DROP TABLE
     IF EXISTS staff CASCADE;
 
 CREATE TABLE staff (
-        staff_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
+        staff_id SERIAL PRIMARY KEY NOT NULL,
         branch_id INT NOT NULL,
         fname VARCHAR(30) NOT NULL,
         lname VARCHAR(30) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE staff (
         hire_date DATE NOT NULL,
         is_manager BOOLEAN,
         valid_dbs BOOLEAN NOT NULL,
-        FOREIGN KEY branch_id REFERENCES branch (branch_id)
+        FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
     );
 
 -- -------------------------------
@@ -53,8 +53,8 @@ DROP TABLE
 
 CREATE TABLE 
     role (
-        role_id SERIAL PRIMARY UNIQUE KEY NOT NULL,
-        name VARCHAR(50) NOT NULL,
+        role_id SERIAL PRIMARY KEY NOT NULL,
+        name VARCHAR(50) NOT NULL UNIQUE,
         description TEXT
     );
 
@@ -66,15 +66,15 @@ DROP TABLE
     IF EXISTS staff_assignments;
 
 CREATE TABLE staff_assigments (
-    assignment_id SERIAL PRIMARY UNIQUE KEY NOT NULL,
+    assignment_id SERIAL PRIMARY KEY NOT NULL,
     staff_id INT NOT NULL,
     branch_id INT NOT NULL,
     role_id INT NOT NULL,
     start_date DATE,
     end_date DATE,
-    FOREIGN KEY staff_id REFERENCES staff (staff_id),
-    FOREIGN KEY branch_id REFERENCES branch (branch_id),
-    FOREIGN KEY role_id REFERENCES role (role_id)
+    FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
+    FOREIGN KEY (branch_id) REFERENCES branch (branch_id),
+    FOREIGN KEY (role_id) REFERENCES role (role_id)
 );
 
 -- -------------------------------
@@ -84,15 +84,19 @@ CREATE TABLE staff_assigments (
 DROP TABLE 
     IF EXISTS course;
 
+CREATE TYPE TIER
+AS
+ENUM('L4', 'L5', 'L6', 'L7');
+
 CREATE TABLE course (
     course_id SERIAL PRIMARY KEY NOT NULL,
-    branch_id
+    branch_id INT NOT NULL,
     name VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
-    academic_level ENUM('L4', 'L5', 'L6', 'L7') NOT NULL,
+    academic_level TIER NOT NULL,
     duration DATE NOT NULL,
-    FOREIGN KEY branch_id REFERENCES branch (branch_id)
-)
+    FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
+);
 
 -- -------------------------------
 -- Table structure for student
@@ -102,14 +106,14 @@ DROP TABLE
     IF EXISTS student;
 
 CREATE TABLE student (
-        student_id SERIAL PRIMARY UNIQUE KEY NOT NULL,
+        student_id SERIAL PRIMARY KEY NOT NULL,
         branch_id INTEGER NOT NULL,
         name VARCHAR(50) NOT NULL,
         lname VARCHAR(50) NOT NULL,
         email VARCHAR(100) NOT NULL,
         phone VARCHAR(15) NOT NULL,
         dob DATE NOT NULL,
-        FOREIGN KEY branch_id REFERENCES branch (branch_id)
+        FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
 );
 
 -- -------------------------------
@@ -119,6 +123,26 @@ CREATE TABLE student (
 DROP TABLE
     IF EXISTS module;
 
+CREATE TYPE subject
+AS 
+ENUM(
+    'Maths',
+    'Applied Mathematics',
+    'Statistics',
+    'Discrete Mathematics',
+    'English Literature',
+    'English Language',
+    'Poetry',
+    'Combined Science',
+    'Physics', 
+    'Biology',
+    'Chemistry',
+    'History',
+    'Geography',
+    'Religious Studies',
+    'Criminology'
+);
+
 CREATE TABLE module (
     module_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
     course_id INT NOT NULL,
@@ -127,27 +151,11 @@ CREATE TABLE module (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     duration DATE NOT NULL,
-    subject_area ENUM(
-        'Maths',
-        'Applied Mathematics',
-        'Statistics',
-        'Discrete Mathematics',
-        'English Literature',
-        'English Language',
-        'Poetry',
-        'Combined Science',
-        'Physics', 
-        'Biology',
-        'Chemistry',
-        'History',
-        'Geography',
-        'Religious Studies',
-        'Criminology'
-    ) NOT NULL,
+    subject_area SUBJECT NOT NULL,
     credits INT,
     description TEXT,
-    FOREIGN KEY course_id REFERENCES course (course_id),
-    FOREIGN KEY student_id REFERENCES student (student_id)
+    FOREIGN KEY (course_id) REFERENCES course (course_id),
+    FOREIGN KEY (student_id) REFERENCES student (student_id)
 );
 
 -- -------------------------------------
@@ -157,20 +165,24 @@ CREATE TABLE module (
 DROP TABLE
     IF EXISTS emergency_contact;
 
+CREATE TYPE rel
+AS
+ENUM(
+    'Parent',
+    'Other Family Member',
+    'Guardian',
+    'Spouse',
+    'Friend'
+);
+
 CREATE TABLE emergency_contact (
     contact_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
     student_id INT NOT NULL,
     full_name VARCHAR(100) NOT NULL,
-    relationship ENUM(
-        'Parent',
-        'Other Family Member',
-        'Guardian',
-        'Spouse',
-        'Friend'
-    ),
+    relationship REL NOT NULL,
     phone VARCHAR(15),
     email VARCHAR(100),
-    FOREIGN KEY student_id REFERENCES student (student_id)
+    FOREIGN KEY (student_id) REFERENCES student (student_id)
 );
 
 -- -------------------------
@@ -180,46 +192,102 @@ CREATE TABLE emergency_contact (
 DROP TABLE
     IF EXISTS room;
 
+CREATE TYPE room_type
+AS
+ENUM(
+    'Classroom',
+    'Lecture Hall',
+    'Workshop',
+    'Lab',
+    'Tutorial Session'
+);
+
 CREATE TABLE room (
-    room_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
+    room_id SERIAL PRIMARY KEY NOT NULL,
     number INT NOT NULL,
     capacity INT NOT NULL,
-    type ENUM(
-        'Classroom',
-        'Lecture Hall',
-        'Workshop',
-        'Lab',
-        'Tutorial Session'
-
-    ) NOT NULL,
-    facilities TEXT  
-     
+    type room_type NOT NULL,
+    facilities TEXT
 );
 
 -- ---------------------------
--- Table structure for module
+-- Table structure for session
 -- ---------------------------
 
 DROP TABLE
     IF EXISTS session;
 
 CREATE TABLE session (
-    session SERIAL UNIQUE NOT NULL,
+    session_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
     module_id INT NOT NULL,
     staff_id INT NOT NULL,
     room_id INT NOT NULL,
     date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    FOREIGN KEY module_id REFERENCES module (module_id),
-    FOREIGN KEY staff_id REFERENCES staff (staff_id),
-    FOREIGN KEY room_id REFERENCES room (room_id)
+    FOREIGN KEY (module_id) REFERENCES module (module_id),
+    FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
+    FOREIGN KEY (room_id) REFERENCES room (room_id)
 );
 
+-- ----------------------------
+-- Table structure for feedback
+-- ----------------------------
 
--- -------------------------
+DROP TABLE
+    IF EXISTS feedback;
+
+CREATE TYPE grade
+AS
+ENUM(
+    'A+',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F'
+);
+
+CREATE TABLE feedback (
+    feedback_id SERIAL PRIMARY KEY UNIQUE NOT NULL,
+    session_id INT NOT NULL,
+    rating grade NOT NULL,
+    comments TEXT,
+    date_submitted DATE NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES session (session_id)
+);
+
+-- ------------------------------------
+-- Table structure for student_feedback
+-- ------------------------------------
+
+DROP TABLE
+    IF EXISTS student_feedback;
+
+CREATE TABLE student_feedback (
+    feedback_id INT NOT NULL,
+    student_id INT NOT NULL,
+    FOREIGN KEY (feedback_id) REFERENCES feedback (feedback_id),
+    FOREIGN KEY (student_id) REFERENCES student (student_id)
+);
+
+-- ------------------
 -- Functions Library
--- -------------------------
+-- ------------------
 
--- create duration field using update on functions
--- attending within room will use function to select student_id where 
+-- create duration for dates using update on functions (needs testing) (will finish in the morning am knackered)
+CREATE OR REPLACE FUNCTION duration_date(start_date, end_date)
+   RETURNS DATE
+   LANGUAGE plpgsql
+  AS
+$$
+BEGIN
+    -- returns calculated difference between dates (duration)
+    RETURN end_date - start_date;
+
+END;
+$$;
+
+
+-- attending within room will use function to select all relevant student_id's and aggregate them

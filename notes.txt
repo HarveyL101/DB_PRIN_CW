@@ -8,6 +8,6 @@ tables built so far:
 - module
 - emergency contact
 - room
-- student feedback -- here onwards tbc
+- student feedback
 - feedback
-- session
+- session -- All tables constructed
