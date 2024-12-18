@@ -29,6 +29,7 @@ CREATE TYPE subject_area_enum AS ENUM (
 -- -------------------------------
 CREATE TABLE branch (
     branch_id SERIAL PRIMARY KEY NOT NULL,
+    name VARCHAR(50) NOT NULL,
     address VARCHAR(50) NOT NULL,
     region VARCHAR(50) NOT NULL, 
     capacity INT NOT NULL,
@@ -187,18 +188,18 @@ CREATE TABLE student_feedback (
 );
 
 
-INSERT INTO branch (address, region, capacity, facilities)
+INSERT INTO branch (name, address, region, capacity, facilities)
 VALUES
-('123 Main Street, London', 'Greater London', 100, 'Parking, Cafeteria, Library'),
-('45 High Street, Manchester', 'Greater Manchester', 150, 'Library, Gym, Workshop Facilities'),
-('678 Elm Avenue, Birmingham', 'West Midlands', 120, 'Lecture Halls, IT Labs, Cafeteria'),
-('90 Church Road, Leeds', 'West Yorkshire', 110, 'Parking, Gym, Cafeteria'),
-('11 King Street, Glasgow', 'Glasgow City', 80, 'Library, Cafeteria'),
-('555 Market Lane, Bristol', 'South West', 140, 'Lecture Halls, IT Labs, Cafeteria'),
-('78 Queensway, Liverpool', 'Merseyside', 130, 'Gym, Library, Parking'),
-('89 St. Andrew’s Street, Edinburgh', 'Edinburgh', 95, 'Cafeteria, IT Labs'),
-('321 Green Road, Cardiff', 'Wales', 90, 'Library, Gym, Parking'),
-('101 North Avenue, Belfast', 'Northern Ireland', 85, 'IT Labs, Workshop Facilities');
+('London Branch', '123 Main Street, London', 'Greater London', 100, 'Parking, Cafeteria, Library'),
+('Manchester Branch', '45 High Street, Manchester', 'Greater Manchester', 150, 'Library, Gym, Workshop Facilities'),
+('Birmingham Branch', '678 Elm Avenue, Birmingham', 'West Midlands', 120, 'Lecture Halls, IT Labs, Cafeteria'),
+('Leeds Branch', '90 Church Road, Leeds', 'West Yorkshire', 110, 'Parking, Gym, Cafeteria'),
+('Glasgow Branch', '11 King Street, Glasgow', 'Glasgow City', 80, 'Library, Cafeteria'),
+('Bristol Branch', '555 Market Lane, Bristol', 'South West', 140, 'Lecture Halls, IT Labs, Cafeteria'),
+('Liverpool Branch', '78 Queensway, Liverpool', 'Merseyside', 130, 'Gym, Library, Parking'),
+('Edinburgh Branch', '89 St. Andrew’s Street, Edinburgh', 'Edinburgh', 95, 'Cafeteria, IT Labs'),
+('Cardiff Branch', '321 Green Road, Cardiff', 'Wales', 90, 'Library, Gym, Parking'),
+('Belfast Branch', '101 North Avenue, Belfast', 'Northern Ireland', 85, 'IT Labs, Workshop Facilities');
 
 INSERT INTO staff (branch_id, fname, lname, email, phone, hire_date, is_manager, valid_dbs)
 VALUES
@@ -279,64 +280,64 @@ VALUES
 INSERT INTO staff_assignments (staff_id, branch_id, role_id, start_date, end_date)
 VALUES
 -- Assignments for Branch 1: London
-(1, 1, 1, '2022-01-01', NULL),   -- John Smith: Branch Manager
-(2, 1, 2, '2022-01-15', NULL),   -- Emily Brown: Academic Lecturer
-(3, 1, 3, '2023-03-01', NULL),   -- Michael Taylor: Program Coordinator
-(4, 1, 6, '2022-02-01', NULL),   -- Sarah Johnson: Career Counselor
+(1, 1, 1, '2022-01-01', NULL),   --manager
+(2, 1, 2, '2022-01-15', NULL),  
+(3, 1, 3, '2023-03-01', NULL),   
+(4, 1, 4, '2022-02-01', NULL),   --module leader
 
 -- Assignments for Branch 2: Manchester
-(5, 2, 1, '2021-12-01', NULL),   -- Sarah Jones: Branch Manager
-(6, 2, 2, '2022-01-10', NULL),   -- James Wilson: Academic Lecturer
-(7, 2, 4, '2023-06-01', NULL),   -- Sophia Davis: Module Leader
-(8, 2, 12, '2023-02-15', NULL),  -- Liam Taylor: Marketing Specialist
+(5, 2, 1, '2021-12-01', NULL),   --manager
+(6, 2, 2, '2022-01-10', NULL),   
+(7, 2, 4, '2023-06-01', NULL),   --module leader
+(8, 2, 12, '2023-02-15', NULL),  
 
 -- Assignments for Branch 3: Birmingham
-(9, 3, 1, '2022-04-01', NULL),   -- David White: Branch Manager
-(10, 3, 2, '2023-01-20', NULL),  -- Olivia Thomas: Academic Lecturer
-(11, 3, 7, '2023-03-10', NULL),  -- Matthew Green: Educational Technologist
-(12, 3, 9, '2022-11-01', NULL),  -- Rachel Adams: Hospitality Coordinator
+(9, 3, 1, '2022-04-01', NULL),   --manager
+(10, 3, 2, '2023-01-20', NULL),  
+(11, 3, 7, '2023-03-10', NULL),  
+(12, 3, 4, '2022-11-01', NULL),  --module leader
 
 -- Assignments for Branch 4: Leeds
-(13, 4, 1, '2021-10-01', NULL),  -- Emma Hall: Branch Manager
-(14, 4, 3, '2022-02-01', NULL),  -- Daniel Harris: Program Coordinator
-(15, 4, 14, '2023-01-01', NULL), -- Charlotte Martinez: Facilities Manager
-(16, 4, 5, '2022-09-01', NULL),  -- Benjamin Clark: STEM Specialist
+(13, 4, 1, '2021-10-01', NULL),  --manager
+(14, 4, 3, '2022-02-01', NULL),  
+(15, 4, 4, '2023-01-01', NULL), --module leader
+(16, 4, 5, '2022-09-01', NULL),  
 
 -- Assignments for Branch 5: Glasgow
-(17, 5, 1, '2021-07-01', NULL),  -- William Lopez: Branch Manager
-(18, 5, 2, '2022-12-01', NULL),  -- Mia Lee: Academic Lecturer
-(19, 5, 5, '2022-03-01', NULL),  -- Christopher Clark: Academic Advisor
-(20, 5, 4, '2022-06-01', NULL),  -- Sophie Rodriguez: Module Leader
+(17, 5, 1, '2021-07-01', NULL),  --manager
+(18, 5, 2, '2022-12-01', NULL),  
+(19, 5, 5, '2022-03-01', NULL),  
+(20, 5, 4, '2022-06-01', NULL),  --module leader
 
 -- Assignments for Branch 6: Bristol
-(21, 6, 2, '2023-01-01', NULL),  -- Elizabeth Lewis: Lecturer in Cybersecurity
-(22, 6, 4, '2023-02-01', NULL),  -- Benjamin Walker: Course Coordinator in Applied Statistics
-(23, 6, 13, '2023-03-01', NULL), -- Ella Young: Administrator for Educational Leadership
-(24, 6, 5, '2022-06-10', NULL),  -- Olivia Miller: Academic Advisor
+(21, 6, 1, '2023-01-01', NULL),  --manager
+(22, 6, 4, '2023-02-01', NULL),  --module leader
+(23, 6, 13, '2023-03-01', NULL), 
+(24, 6, 5, '2022-06-10', NULL),  
 
 -- Assignments for Branch 7: Liverpool
-(25, 7, 3, '2023-05-01', NULL),  -- Alexander King: Lecturer in Graphic Design
-(26, 7, 4, '2023-04-01', NULL),  -- Grace Scott: Lab Assistant in Engineering Principles
-(27, 7, 1, '2023-06-01', NULL),  -- Ethan Turner: Principal Lecturer in Psychology
-(28, 7, 2, '2023-07-01', NULL),  -- Isabella Wright: Course Coordinator in World Literature
+(25, 7, 1, '2023-05-01', NULL),  --manager
+(26, 7, 4, '2023-04-01', NULL),  --module leader
+(27, 7, 1, '2023-06-01', NULL), 
+(28, 7, 2, '2023-07-01', NULL), 
 
 -- Assignments for Branch 8: Edinburgh
-(29, 8, 2, '2023-07-01', NULL),  -- Samuel Hill: Lecturer in Artificial Intelligence
-(30, 8, 3, '2023-08-01', NULL),  -- Ava Adams: Tutor in Hospitality Management
-(31, 8, 1, '2023-09-01', NULL),  -- Oliver Davis: Branch Manager
-(32, 8, 5, '2023-10-01', NULL),  -- Emma Taylor: Course Administrator for World Literature
+(29, 8, 4, '2023-07-01', NULL),  --module leader
+(30, 8, 3, '2023-08-01', NULL),  
+(31, 8, 1, '2023-09-01', NULL),  --manager
+(32, 8, 5, '2023-10-01', NULL),  
 
 -- Assignments for Branch 9: Cardiff
-(33, 9, 1, '2023-10-01', NULL),  -- Ethan Mitchell: Senior Lecturer in Geography and Climate Change
-(34, 9, 4, '2023-11-01', NULL),  -- Isabella Perez: IT Support Technician for Poetry
-(35, 9, 2, '2023-12-01', NULL),  -- Jack Carter: Lecturer in Project Management
-(36, 9, 6, '2024-01-01', NULL),  -- Lily Brown: Career Counselor
+(33, 9, 1, '2023-10-01', NULL),  --manager
+(34, 9, 4, '2023-11-01', NULL),  --module leader
+(35, 9, 2, '2023-12-01', NULL),  
+(36, 9, 6, '2024-01-01', NULL),  
 
 -- Assignments for Branch 10: Belfast
-(37, 10, 3, '2024-01-01', NULL),  -- William Clark: Course Coordinator in Public Speaking and Communication
-(38, 10, 2, '2024-02-01', NULL),  -- Mia Lopez: Academic Lecturer
-(39, 10, 5, '2024-03-01', NULL),  -- Benjamin Lewis: Principal Lecturer in Ethics in Business
-(40, 10, 12, '2024-04-01', NULL); -- Charlotte Walker: Module Leader
+(37, 10, 1, '2024-01-01', NULL),  --manager
+(38, 10, 2, '2024-02-01', NULL),  
+(39, 10, 5, '2024-03-01', NULL),  
+(40, 10, 4, '2024-04-01', NULL); --module leader
 
 
 INSERT INTO course (branch_id, name, description, academic_level, duration)
@@ -388,7 +389,7 @@ VALUES
 
 -- Courses for Branch 10: Belfast
 (10, 'Public Speaking and Communication', 'Improving confidence and effectiveness in public speaking.', 'L4', 120),
-(10, 'Bioinformatics', 'Integrating biology and computational methods for research.', 'L6', 210),
+(10, 'Bio-information', 'Integrating biology and computational methods for research.', 'L6', 210),
 (10, 'Ethics in Business', 'Understanding ethical challenges in modern business.', 'L7', 200);
 
 
@@ -800,12 +801,182 @@ VALUES
 ('Good', 'Good content, but I feel like it could have been covered more thoroughly.', 45);
 
 ---INSERT FOR STUDENT_FEEDBACK needed---
+INSERT INTO student_feedback (feedback_id, student_id)
+VALUES
+    (1, 1),   
+    (2, 2),   
+    (3, 3),   
+    (4, 4),   
+    (5, 5),   
+    (6, 6),   
+    (7, 7),   
+    (8, 8),   
+    (9, 9),  
+    (10, 10), 
+    (11, 11), 
+    (12, 12), 
+    (13, 13),
+    (14, 14), 
+    (15, 15), 
+    (16, 16),
+    (17, 17), 
+    (18, 18), 
+    (19, 19), 
+    (20, 20), 
+    (21, 21), 
+    (22, 22), 
+    (23, 23), 
+    (24, 24), 
+    (25, 25), 
+    (26, 26), 
+    (27, 27), 
+    (28, 28), 
+    (29, 29),
+    (30, 30), 
+    (31, 31), 
+    (32, 32), 
+    (33, 33), 
+    (34, 34), 
+    (35, 35), 
+    (36, 36); 
 
--- ------------------
+-- -------------------------
+-- Useful Queries
+-- -------------------------
+SELECT
+    b.name AS "Branch Name",
+    s.name AS "Student First Name",
+    s.lname AS "Student Last Name",
+    s.email AS "Email",
+    s.phone AS "Phone",
+    s.dob AS "Date of Birth"
+FROM
+    student s
+JOIN branch b ON s.branch_id = b.branch_id
+ORDER BY b.name, s.lname;
+--This query is used to see all students grouped by which branch of SES they attend--
+
+
+CREATE VIEW TopRatedSessions AS
+SELECT
+    s.session_id AS "Session ID",
+    f.rating AS "Feedback Rating",
+    f.comments AS "Students Comments"
+FROM
+    session s
+JOIN 
+    feedback f ON s.session_id = f.session_id
+WHERE
+    f.rating = 'Excellent';
+
+SELECT * FROM TopRatedSessions;
+--This query is used to see the best rated sessions and relevant information for those sessions--
+
+
+CREATE VIEW StudentEngagement AS
+SELECT 
+    st.student_id AS "Student ID",
+    CONCAT(st.name, ' ', st.lname) AS "Student Name",
+    COUNT(DISTINCT sf.feedback_id) AS "Sessions Attended"
+FROM 
+    student st
+JOIN 
+    student_feedback sf ON st.student_id = sf.student_id
+GROUP BY 
+    st.student_id
+ORDER BY 
+    "Sessions Attended" DESC;
+
+SELECT * FROM StudentEngagement;
+
+
+SELECT 
+    s.session_id AS "Session ID",
+    COUNT(DISTINCT sf.student_id) AS "Attendance",
+    COUNT(f.feedback_id) AS "Total Feedback",
+    AVG(CASE 
+            WHEN f.rating = 'Excellent' THEN 4
+            WHEN f.rating = 'Good' THEN 3
+            WHEN f.rating = 'Average' THEN 2
+            WHEN f.rating = 'Poor' THEN 1
+            ELSE 0
+        END) AS "Average Rating"
+FROM 
+    session s
+LEFT JOIN 
+    feedback f ON s.session_id = f.session_id
+LEFT JOIN 
+    student_feedback sf ON f.feedback_id = sf.feedback_id
+GROUP BY 
+    s.session_id
+ORDER BY
+    "Average Rating" DESC;
+
+
+--SELECT
+--    s.session_id,
+--    COUNT(DISTINCT sf.student_id) AS "Attendance",
+--    SUM(CASE WHEN f.rating = 'Excellent' THEN 1 ELSE 0 END) AS "Excellent Feedback",
+--    SUM(CASE WHEN f.rating = 'Good' THEN 1 ELSE 0 END) AS "Good Feedback",
+--    SUM(CASE WHEN f.rating = 'Average' THEN 1 ELSE 0 END) AS "Average Feedback",
+--    SUM(CASE WHEN f.rating = 'Poor' THEN 1 ELSE 0 END) AS "Poor Feedback"
+--FROM
+--    session s 
+--LEFT JOIN 
+--    feedback f ON s.session_id = f.session_id
+--LEFT JOIN
+--   student_feedback sf ON f.feedback_id = sf.feedback_id
+--GROUP BY 
+--    s.session_id;
+
+
+-- -------------------------
+-- Security
+-- -------------------------
+CREATE ROLE branch_manager;
+CREATE ROLE module_leader;
+CREATE ROLE lecturer;
+CREATE ROLE staff;
+CREATE ROLE student;
+
+-- Grant permissions for managers
+GRANT SELECT, INSERT, UPDATE, DELETE ON branch TO branch_manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON staff TO branch_manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON staff_assignments TO branch_manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON course TO branch_manager;
+GRANT SELECT, UPDATE ON module TO branch_manager;  
+
+-- Grant permissions for module leaders
+GRANT SELECT, UPDATE ON module TO module_leader;
+GRANT SELECT, UPDATE ON course TO module_leader;
+GRANT SELECT ON session TO module_leader;
+GRANT SELECT, UPDATE ON staff_assignments TO module_leader; 
+
+-- Grant permissions for lectureres and staff
+GRANT SELECT, UPDATE ON session TO lecturer;
+GRANT SELECT, UPDATE ON feedback TO lecturer;
+GRANT SELECT ON student_feedback TO lecturer;
+GRANT SELECT ON staff TO lecturer;  --reference purposes only
+
+GRANT SELECT, UPDATE ON session TO staff;
+GRANT SELECT, UPDATE ON feedback TO staff;
+GRANT SELECT ON student_feedback TO staff;
+
+-- Grant permissions for Students
+GRANT SELECT ON session TO student;
+GRANT SELECT ON course TO student;
+GRANT SELECT ON feedback TO student;
+GRANT INSERT ON student_feedback TO student;  
+
+--Staff assignments control--
+GRANT SELECT, UPDATE, DELETE ON staff_assignments TO branch_manager;
+
+
+-- -------------------------
 -- Functions Library
--- ------------------
+-- -------------------------
 
--- create duration for dates using update on functions (needs testing) (will finish in the morning am knackered)
+-- create duration field using update on functions
 CREATE OR REPLACE FUNCTION duration_date(start_date, end_date)
    RETURNS DATE
    LANGUAGE plpgsql
@@ -818,5 +989,4 @@ BEGIN
 END;
 $$;
 
-
--- attending within room will use function to select all relevant student_id's and aggregate them
+-- attending within room will use function to select student_id where 
