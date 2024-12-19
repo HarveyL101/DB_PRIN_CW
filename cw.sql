@@ -1000,6 +1000,7 @@ GRANT SELECT, UPDATE, DELETE ON staff_assignments TO branch_manager;
 -- ------------------
 
 -- create duration for dates using update on functions (needs testing) (will finish in the morning am knackered)
+/*
 CREATE OR REPLACE FUNCTION update_duration_date()
    RETURNS TRIGGER 
    LANGUAGE plpgsql
@@ -1016,6 +1017,7 @@ AFTER INSERT OR UPDATE OF start_date, end_date
 ON module
 FOR EACH ROW
 EXECUTE PROCEDURE update_duration_date();
+*/
 -- Testing func:
 -- When start_date < end_date
 
