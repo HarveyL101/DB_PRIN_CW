@@ -10,7 +10,10 @@ CREATE DATABASE "cw_1";
 \c cw_1
 
 --Drops tables if needed--
-DROP TABLE IF EXISTS role, staff_assignments, staff, branch, course, room, session, student, module, feedback, student_feedback, emergency_contact CASCADE;
+DROP TABLE IF EXISTS 
+    role, staff_assignments, staff, branch, course, room, session, 
+    student, module, feedback, student_feedback, emergency_contact 
+CASCADE;
 
 --Create the ENUM types for the tables--
 CREATE TYPE rating_enum AS ENUM ('Excellent', 'Good', 'Average', 'Poor');
@@ -49,7 +52,8 @@ CREATE TABLE staff (
         hire_date DATE NOT NULL,
         is_manager BOOLEAN,
         valid_dbs BOOLEAN NOT NULL,
-        FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
+        FOREIGN KEY (branch_id) REFERENCES branch (branch_id),
+        UNIQUE (email, phone)
     );
 
 -- -------------------------------
@@ -75,7 +79,6 @@ CREATE TABLE staff_assignments (
     FOREIGN KEY (staff_id) REFERENCES staff (staff_id),
     FOREIGN KEY (branch_id) REFERENCES branch (branch_id),
     FOREIGN KEY (role_id) REFERENCES role (role_id),
-    UNIQUE (staff_id, branch_id, role_id)
 );
 
 -- -------------------------------
@@ -84,41 +87,44 @@ CREATE TABLE staff_assignments (
 CREATE TABLE course (
     course_id SERIAL PRIMARY KEY NOT NULL,
     branch_id INT NOT NULL,
-    name VARCHAR(100) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
     description TEXT,
     academic_level academic_level_enum NOT NULL,
     duration INT NOT NULL,
-    FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
+    FOREIGN KEY (branch_id) REFERENCES branch (branch_id),
+    UNIQUE (name)
 );
 
 -- -------------------------------
 -- Table structure for student
 -- -------------------------------
 CREATE TABLE student (
-        student_id SERIAL PRIMARY KEY NOT NULL,
-        branch_id INTEGER NOT NULL,
-        name VARCHAR(50) NOT NULL,
-        lname VARCHAR(50) NOT NULL,
-        email VARCHAR(100) NOT NULL,
-        phone VARCHAR(15) NOT NULL,
-        dob DATE NOT NULL,
-        FOREIGN KEY (branch_id) REFERENCES branch (branch_id)
+    student_id SERIAL PRIMARY KEY NOT NULL,
+    branch_id INT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    lname VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    dob DATE NOT NULL,
+    FOREIGN KEY (branch_id) REFERENCES branch (branch_id),
+    UNIQUE (email, phone)
 );
 
 -- -------------------------------
 -- Table structure for module
 -- -------------------------------
 CREATE TABLE module (
-    module_id SERIAL PRIMARY KEY NOT NULL, -----remove student_id from erd & dd for module
+    module_id SERIAL PRIMARY KEY NOT NULL, 
     course_id INT NOT NULL,
-    name VARCHAR(100) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    duration INT NOT NULL,
+    duration TEXT,
     subject_area subject_area_enum NOT NULL,
     credits INT,
     description TEXT,
-    FOREIGN KEY (course_id) REFERENCES course (course_id)
+    FOREIGN KEY (course_id) REFERENCES course (course_id),
+    UNIQUE (name)
 );
 
 -- -------------------------------------
@@ -139,29 +145,30 @@ CREATE TABLE emergency_contact (
 -- -------------------------
 CREATE TABLE room (
     room_id SERIAL PRIMARY KEY NOT NULL,
-    number INT UNIQUE NOT NULL,
+    number INT NOT NULL,
     capacity INT NOT NULL,
     type session_type_enum NOT NULL,
-    facilities TEXT  
-     
+    facilities TEXT,
+    UNIQUE (number)
 );
 
 
 -- -------------------------
 -- Table structure for session
 -- -------------------------
-CREATE TABLE session(
+CREATE TABLE session (
     session_id SERIAL PRIMARY KEY NOT NULL,
-    session_date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
     module_id INT NOT NULL,
     staff_id INT NOT NULL,
     number INT NOT NULL,
+    session_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
     FOREIGN KEY (module_id) REFERENCES module (module_id) ON DELETE CASCADE,
     FOREIGN KEY (staff_id) REFERENCES staff (staff_id) ON DELETE CASCADE,
     FOREIGN KEY (number) REFERENCES room (number) ON DELETE CASCADE,
-    CHECK (start_time < end_time)
+    CHECK (start_time < end_time),
+    UNIQUE (number)
 );
 
 -- -------------------------
@@ -173,7 +180,7 @@ CREATE TABLE feedback (
     comments TEXT,
     date_submitted DATE NOT NULL DEFAULT CURRENT_DATE,
     session_id INT NOT NULL,
-    FOREIGN KEY (session_id) REFERENCES session (session_id) ON DELETE CASCADE
+    FOREIGN KEY (session_id) REFERENCES session (session_id) ON DELETE CASCADE,
 );
 
 -- -------------------------
@@ -343,54 +350,54 @@ VALUES
 INSERT INTO course (branch_id, name, description, academic_level, duration)
 VALUES
 -- Courses for Branch 1: London
-(1, 'Advanced Mathematics', 'Comprehensive course in advanced mathematical theories and applications.', 'L6', 180),
-(1, 'Creative Writing', 'Exploring fiction, poetry, and creative nonfiction.', 'L5', 120),
-(1, 'Business Management', 'Foundations of managing businesses in competitive environments.', 'L7', 240),
+(1, 'Advanced Mathematics', 'Comprehensive course in advanced mathematical theories and applications.', 'L6', '180 Days'),
+(1, 'Creative Writing', 'Exploring fiction, poetry, and creative nonfiction.', 'L5', '120 Days'),
+(1, 'Business Management', 'Foundations of managing businesses in competitive environments.', 'L7', '240 Days'),
 
 -- Courses for Branch 2: Manchester
-(2, 'Data Science Fundamentals', 'Introduction to data analytics, machine learning, and visualization.', 'L6', 200),
-(2, 'History of Modern Europe', 'Critical analysis of European history from 1800 to present.', 'L5', 180),
-(2, 'Marketing Strategies', 'Techniques for effective marketing in a digital world.', 'L7', 150),
+(2, 'Data Science Fundamentals', 'Introduction to data analytics, machine learning, and visualization.', 'L6', '200 Days'),
+(2, 'History of Modern Europe', 'Critical analysis of European history from 1800 to present.', 'L5', '180 Days'),
+(2, 'Marketing Strategies', 'Techniques for effective marketing in a digital world.', 'L7', '150 Days'),
 
 -- Courses for Branch 3: Birmingham
-(3, 'Software Development', 'Advanced programming and systems design principles.', 'L6', 200),
-(3, 'Physics in Everyday Life', 'Understanding the principles of physics through real-world applications.', 'L5', 180),
-(3, 'Health and Social Care', 'Preparing for careers in healthcare and community services.', 'L4', 160),
+(3, 'Software Development', 'Advanced programming and systems design principles.', 'L6', '200 Days'),
+(3, 'Physics in Everyday Life', 'Understanding the principles of physics through real-world applications.', 'L5', '180 Days'),
+(3, 'Health and Social Care', 'Preparing for careers in healthcare and community services.', 'L4', '160 Days'),
 
 -- Courses for Branch 4: Leeds
-(4, 'Environmental Science', 'Study of environmental systems, sustainability, and conservation.', 'L6', 180),
-(4, 'Introduction to Criminology', 'Fundamentals of criminological theory and criminal justice.', 'L4', 150),
-(4, 'Entrepreneurship and Innovation', 'Creating and managing innovative businesses.', 'L7', 210),
+(4, 'Environmental Science', 'Study of environmental systems, sustainability, and conservation.', 'L6', '180 Days'),
+(4, 'Introduction to Criminology', 'Fundamentals of criminological theory and criminal justice.', 'L4', '150 Days'),
+(4, 'Entrepreneurship and Innovation', 'Creating and managing innovative businesses.', 'L7', '210 Days'),
 
 -- Courses for Branch 5: Glasgow
-(5, 'Biological Sciences', 'Comprehensive overview of modern biology and research methods.', 'L5', 180),
-(5, 'English Literature', 'In-depth study of classic and modern English literary works.', 'L6', 200),
-(5, 'Vocational Training: Electrician', 'Hands-on training for becoming a certified electrician.', 'L4', 140),
+(5, 'Biological Sciences', 'Comprehensive overview of modern biology and research methods.', 'L5', '180 Days'),
+(5, 'English Literature', 'In-depth study of classic and modern English literary works.', 'L6', '200 Days'),
+(5, 'Vocational Training: Electrician', 'Hands-on training for becoming a certified electrician.', 'L4', '140 Days'),
 
 -- Courses for Branch 6: Bristol
-(6, 'Cybersecurity', 'Advanced techniques for protecting information systems.', 'L7', 220),
-(6, 'Applied Statistics', 'Practical applications of statistics in various industries.', 'L5', 180),
-(6, 'Educational Leadership', 'Developing leadership skills for academic institutions.', 'L7', 240),
+(6, 'Cybersecurity', 'Advanced techniques for protecting information systems.', 'L7', '220 Days'),
+(6, 'Applied Statistics', 'Practical applications of statistics in various industries.', 'L5', '180 Days'),
+(6, 'Educational Leadership', 'Developing leadership skills for academic institutions.', 'L7', '240 Days'),
 
 -- Courses for Branch 7: Liverpool
-(7, 'Graphic Design', 'Introduction to digital and traditional design techniques.', 'L5', 150),
-(7, 'Engineering Principles', 'Study of mechanical, electrical, and civil engineering fundamentals.', 'L6', 210),
-(7, 'Psychology Basics', 'Understanding human behavior and mental processes.', 'L4', 120),
+(7, 'Graphic Design', 'Introduction to digital and traditional design techniques.', 'L5', '150 Days'),
+(7, 'Engineering Principles', 'Study of mechanical, electrical, and civil engineering fundamentals.', 'L6', '210 Days'),
+(7, 'Psychology Basics', 'Understanding human behavior and mental processes.', 'L4', '120 Days'),
 
 -- Courses for Branch 8: Edinburgh
-(8, 'Artificial Intelligence', 'Deep dive into AI, machine learning, and neural networks.', 'L7', 200),
-(8, 'World Literature', 'Exploring literary works from across the globe.', 'L6', 180),
-(8, 'Hospitality Management', 'Training for careers in the hospitality industry.', 'L5', 160),
+(8, 'Artificial Intelligence', 'Deep dive into AI, machine learning, and neural networks.', 'L7', '200 Days'),
+(8, 'World Literature', 'Exploring literary works from across the globe.', 'L6', '180 Days'),
+(8, 'Hospitality Management', 'Training for careers in the hospitality industry.', 'L5', '160 Days'),
 
 -- Courses for Branch 9: Cardiff
-(9, 'Geography and Climate Change', 'Study of geographical patterns and climate change impacts.', 'L6', 190),
-(9, 'Introduction to Poetry', 'Understanding and creating poetic works.', 'L4', 130),
-(9, 'Project Management', 'Mastering project planning and execution.', 'L7', 180),
+(9, 'Geography and Climate Change', 'Study of geographical patterns and climate change impacts.', 'L6', '190 Days'),
+(9, 'Introduction to Poetry', 'Understanding and creating poetic works.', 'L4', '130 Days'),
+(9, 'Project Management', 'Mastering project planning and execution.', 'L7', '180 Days'),
 
 -- Courses for Branch 10: Belfast
-(10, 'Public Speaking and Communication', 'Improving confidence and effectiveness in public speaking.', 'L4', 120),
-(10, 'Bio-information', 'Integrating biology and computational methods for research.', 'L6', 210),
-(10, 'Ethics in Business', 'Understanding ethical challenges in modern business.', 'L7', 200);
+(10, 'Public Speaking and Communication', 'Improving confidence and effectiveness in public speaking.', 'L4', '120 Days'),
+(10, 'Bio-information', 'Integrating biology and computational methods for research.', 'L6', '210 Days'),
+(10, 'Ethics in Business', 'Understanding ethical challenges in modern business.', 'L7', '200 Days');
 
 
 INSERT INTO student (branch_id, name, lname, email, phone, dob)
@@ -466,127 +473,126 @@ VALUES
 (10, 'Lily', 'Martin', 'up2830199@myport.ac.uk', '07123456857', '1999-03-10'),
 (10, 'Jacob', 'King', 'up2613742@myport.ac.uk', '07123456858', '2000-06-26');
 
-
 INSERT INTO module (course_id, name, start_date, end_date, duration, subject_area, credits, description)
 VALUES
 -- Maths
-(1, 'Introduction to Algebra', '2024-01-10', '2024-06-10', 6, 'Maths', 20, 'An introductory course on algebraic concepts, including equations and inequalities.'),
-(1, 'Calculus I', '2024-02-15', '2024-07-15', 6, 'Maths', 25, 'A foundational module on calculus focusing on limits, derivatives, and integration.'),
-(1, 'Linear Algebra', '2024-03-01', '2024-08-01', 6, 'Maths', 20, 'A study of vector spaces, matrices, and linear transformations.'),
-(1, 'Discrete Mathematics', '2024-04-01', '2024-09-01', 6, 'Maths', 22, 'An introduction to discrete structures, combinatorics, and graph theory.'),
-(1, 'Differential Equations', '2024-05-10', '2024-10-10', 6, 'Maths', 23, 'An advanced course on solving ordinary differential equations and their applications.'),
-(1, 'Mathematical Proofs', '2024-06-15', '2024-11-15', 6, 'Maths', 20, 'A module focusing on the principles and techniques of mathematical proof writing.'),
+(1, 'Introduction to Algebra', '2024-01-10', '2024-06-10', "5 Months", 'Maths', 20, 'An introductory course on algebraic concepts, including equations and inequalities.'),
+(1, 'Calculus I', '2024-02-15', '2024-07-15', "5 Months", 'Maths', 25, 'A foundational module on calculus focusing on limits, derivatives, and integration.'),
+(1, 'Linear Algebra', '2024-03-01', '2024-08-01', "5 Months", 'Maths', 20, 'A study of vector spaces, matrices, and linear transformations.'),
+(1, 'Discrete Mathematics', '2024-04-01', '2024-09-01', "5 Months", 'Maths', 22, 'An introduction to discrete structures, combinatorics, and graph theory.'),
+(1, 'Differential Equations', '2024-05-10', '2024-10-10', "5 Months", 'Maths', 23, 'An advanced course on solving ordinary differential equations and their applications.'),
+(1, 'Mathematical Proofs', '2024-06-15', '2024-11-15', "5 Months", 'Maths', 20, 'A module focusing on the principles and techniques of mathematical proof writing.'),
 
 -- Applied Mathematics
-(2, 'Applied Calculus', '2024-02-10', '2024-07-10', 6, 'Applied Mathematics', 24, 'A course that applies calculus to real-world problems in engineering and physics.'),
-(2, 'Numerical Methods', '2024-03-01', '2024-08-01', 6, 'Applied Mathematics', 25, 'An exploration of numerical techniques used in solving complex mathematical problems.'),
-(2, 'Optimization Methods', '2024-04-05', '2024-09-05', 6, 'Applied Mathematics', 23, 'A study of mathematical optimization techniques in various scientific fields.'),
-(2, 'Mathematical Modelling', '2024-05-01', '2024-10-01', 6, 'Applied Mathematics', 25, 'A course on creating and analyzing mathematical models for real-world scenarios.'),
-(2, 'Probability Theory', '2024-06-01', '2024-11-01', 6, 'Applied Mathematics', 22, 'A course on the fundamental principles of probability theory and its applications.'),
-(2, 'Complex Variables', '2024-07-01', '2024-12-01', 6, 'Applied Mathematics', 24, 'An advanced course on functions of a complex variable and their applications.'),
+(2, 'Applied Calculus', '2024-02-10', '2024-07-10', "5 Months", 'Applied Mathematics', 24, 'A course that applies calculus to real-world problems in engineering and physics.'),
+(2, 'Numerical Methods', '2024-03-01', '2024-08-01', "5 Months", 'Applied Mathematics', 25, 'An exploration of numerical techniques used in solving complex mathematical problems.'),
+(2, 'Optimization Methods', '2024-04-05', '2024-09-05', "5 Months", 'Applied Mathematics', 23, 'A study of mathematical optimization techniques in various scientific fields.'),
+(2, 'Mathematical Modelling', '2024-05-01', '2024-10-01', "5 Months", 'Applied Mathematics', 25, 'A course on creating and analyzing mathematical models for real-world scenarios.'),
+(2, 'Probability Theory', '2024-06-01', '2024-11-01', "5 Months", 'Applied Mathematics', 22, 'A course on the fundamental principles of probability theory and its applications.'),
+(2, 'Complex Variables', '2024-07-01', '2024-12-01', "5 Months", 'Applied Mathematics', 24, 'An advanced course on functions of a complex variable and their applications.'),
 
 -- Statistics
-(3, 'Introduction to Statistics', '2024-01-10', '2024-06-10', 6, 'Statistics', 20, 'A beginner module on basic statistical concepts such as mean, median, and standard deviation.'),
-(3, 'Probability and Statistics', '2024-02-15', '2024-07-15', 6, 'Statistics', 22, 'A deeper look into probability distributions, hypothesis testing, and confidence intervals.'),
-(3, 'Regression Analysis', '2024-03-01', '2024-08-01', 6, 'Statistics', 21, 'A course on statistical modeling techniques such as linear regression and logistic regression.'),
-(3, 'Time Series Analysis', '2024-04-01', '2024-09-01', 6, 'Statistics', 23, 'A module that covers techniques for analyzing data points in time-dependent sequences.'),
-(3, 'Statistical Inference', '2024-05-01', '2024-10-01', 6, 'Statistics', 24, 'A course focused on methods of making inferences from sample data, including estimation and hypothesis testing.'),
-(3, 'Multivariate Statistics', '2024-06-01', '2024-11-01', 6, 'Statistics', 25, 'An advanced module covering the analysis of multiple variables simultaneously, including principal component analysis.'),
+(3, 'Introduction to Statistics', '2024-01-10', '2024-06-10', "5 Months", 'Statistics', 20, 'A beginner module on basic statistical concepts such as mean, median, and standard deviation.'),
+(3, 'Probability and Statistics', '2024-02-15', '2024-07-15', "5 Months", 'Statistics', 22, 'A deeper look into probability distributions, hypothesis testing, and confidence intervals.'),
+(3, 'Regression Analysis', '2024-03-01', '2024-08-01', "5 Months", 'Statistics', 21, 'A course on statistical modeling techniques such as linear regression and logistic regression.'),
+(3, 'Time Series Analysis', '2024-04-01', '2024-09-01', "5 Months", 'Statistics', 23, 'A module that covers techniques for analyzing data points in time-dependent sequences.'),
+(3, 'Statistical Inference', '2024-05-01', '2024-10-01', "5 Months", 'Statistics', 24, 'A course focused on methods of making inferences from sample data, including estimation and hypothesis testing.'),
+(3, 'Multivariate Statistics', '2024-06-01', '2024-11-01', "5 Months", 'Statistics', 25, 'An advanced module covering the analysis of multiple variables simultaneously, including principal component analysis.'),
 
 -- Discrete Mathematics
-(4, 'Logic and Set Theory', '2024-01-10', '2024-06-10', 6, 'Discrete Mathematics', 20, 'A study of formal logic, sets, and relations, with applications in computer science.'),
-(4, 'Graph Theory', '2024-02-10', '2024-07-10', 6, 'Discrete Mathematics', 22, 'An introduction to graph theory and its applications in algorithms and networking.'),
-(4, 'Combinatorics', '2024-03-01', '2024-08-01', 6, 'Discrete Mathematics', 20, 'A course on combinatorial mathematics, including counting principles and binomial coefficients.'),
-(4, 'Algorithms and Complexity', '2024-04-05', '2024-09-05', 6, 'Discrete Mathematics', 25, 'A module on algorithmic problem solving and the complexity of computational tasks.'),
-(4, 'Coding Theory', '2024-05-01', '2024-10-01', 6, 'Discrete Mathematics', 23, 'A course focused on error detection and correction in communication systems.'),
-(4, 'Automata Theory', '2024-06-01', '2024-11-01', 6, 'Discrete Mathematics', 24, 'An introduction to the theory of automata, languages, and computation.'),
+(4, 'Logic and Set Theory', '2024-01-10', '2024-06-10',"5 Months", 'Discrete Mathematics', 20, 'A study of formal logic, sets, and relations, with applications in computer science.'),
+(4, 'Graph Theory', '2024-02-10', '2024-07-10',"5 Months", 'Discrete Mathematics', 22, 'An introduction to graph theory and its applications in algorithms and networking.'),
+(4, 'Combinatorics', '2024-03-01', '2024-08-01',"5 Months", 'Discrete Mathematics', 20, 'A course on combinatorial mathematics, including counting principles and binomial coefficients.'),
+(4, 'Algorithms and Complexity', '2024-04-05', '2024-09-05',"5 Months", 'Discrete Mathematics', 25, 'A module on algorithmic problem solving and the complexity of computational tasks.'),
+(4, 'Coding Theory', '2024-05-01', '2024-10-01',"5 Months", 'Discrete Mathematics', 23, 'A course focused on error detection and correction in communication systems.'),
+(4, 'Automata Theory', '2024-06-01', '2024-11-01',"5 Months", 'Discrete Mathematics', 24, 'An introduction to the theory of automata, languages, and computation.'),
 
 -- English Literature
-(5, 'English Poetry from the 18th Century', '2024-01-10', '2024-06-10', 6, 'English Literature', 22, 'An analysis of 18th-century poetry, exploring key poets like William Blake and Alexander Pope.'),
-(5, 'Victorian Novelists', '2024-02-15', '2024-07-15', 6, 'English Literature', 20, 'A module on the works of Victorian novelists such as Charles Dickens and the Brontë sisters.'),
-(5, 'Shakespearean Drama', '2024-03-01', '2024-08-01', 6, 'English Literature', 23, 'An in-depth study of Shakespeare’s major plays, including historical and contemporary interpretations.'),
-(5, 'Modernist Literature', '2024-04-01', '2024-09-01', 6, 'English Literature', 25, 'A course on modernist authors like James Joyce, Virginia Woolf, and T.S. Eliot.'),
-(5, 'Romantic Poetry', '2024-05-01', '2024-10-01', 6, 'English Literature', 22, 'A study of Romantic poets, including Wordsworth, Keats, and Shelley, focusing on their poetic techniques.'),
-(5, 'American Literature', '2024-06-01', '2024-11-01', 6, 'English Literature', 24, 'A course on the evolution of American literature from the 19th to the 20th century.'),
+(5, 'English Poetry from the 18th Century', '2024-01-10', '2024-06-10',"5 Months", 'English Literature', 22, 'An analysis of 18th-century poetry, exploring key poets like William Blake and Alexander Pope.'),
+(5, 'Victorian Novelists', '2024-02-15', '2024-07-15',"5 Months", 'English Literature', 20, 'A module on the works of Victorian novelists such as Charles Dickens and the Brontë sisters.'),
+(5, 'Shakespearean Drama', '2024-03-01', '2024-08-01',"5 Months", 'English Literature', 23, 'An in-depth study of Shakespeare’s major plays, including historical and contemporary interpretations.'),
+(5, 'Modernist Literature', '2024-04-01', '2024-09-01',"5 Months", 'English Literature', 25, 'A course on modernist authors like James Joyce, Virginia Woolf, and T.S. Eliot.'),
+(5, 'Romantic Poetry', '2024-05-01', '2024-10-01',"5 Months", 'English Literature', 22, 'A study of Romantic poets, including Wordsworth, Keats, and Shelley, focusing on their poetic techniques.'),
+(5, 'American Literature', '2024-06-01', '2024-11-01',"5 Months", 'English Literature', 24, 'A course on the evolution of American literature from the 19th to the 20th century.'),
 
 -- English Language
-(6, 'Introduction to Linguistics', '2024-01-10', '2024-06-10', 6, 'English Language', 20, 'A basic introduction to the study of language and linguistics.'),
-(6, 'Phonetics and Phonology', '2024-02-10', '2024-07-10', 6, 'English Language', 22, 'A study of speech sounds and their roles in spoken language.'),
-(6, 'Syntax and Semantics', '2024-03-01', '2024-08-01', 6, 'English Language', 20, 'A module covering sentence structure and meaning in English.'),
-(6, 'Sociolinguistics', '2024-04-01', '2024-09-01', 6, 'English Language', 23, 'An exploration of the relationship between language and society, focusing on dialects and language change.'),
-(6, 'Pragmatics', '2024-05-01', '2024-10-01', 6, 'English Language', 24, 'A study of how context influences meaning in language use.'),
-(6, 'Discourse Analysis', '2024-06-01', '2024-11-01', 6, 'English Language', 25, 'A course on analyzing language in use, focusing on conversation and written texts.'),
+(6, 'Introduction to Linguistics', '2024-01-10', '2024-06-10',"5 Months", 'English Language', 20, 'A basic introduction to the study of language and linguistics.'),
+(6, 'Phonetics and Phonology', '2024-02-10', '2024-07-10',"5 Months", 'English Language', 22, 'A study of speech sounds and their roles in spoken language.'),
+(6, 'Syntax and Semantics', '2024-03-01', '2024-08-01',"5 Months", 'English Language', 20, 'A module covering sentence structure and meaning in English.'),
+(6, 'Sociolinguistics', '2024-04-01', '2024-09-01',"5 Months", 'English Language', 23, 'An exploration of the relationship between language and society, focusing on dialects and language change.'),
+(6, 'Pragmatics', '2024-05-01', '2024-10-01',"5 Months", 'English Language', 24, 'A study of how context influences meaning in language use.'),
+(6, 'Discourse Analysis', '2024-06-01', '2024-11-01',"5 Months", 'English Language', 25, 'A course on analyzing language in use, focusing on conversation and written texts.'),
 
 -- Poetry
-(7, 'Modern Poetry', '2024-01-10', '2024-06-10', 6, 'Poetry', 20, 'A study of modern poets such as W.B. Yeats, Sylvia Plath, and Langston Hughes.'),
-(7, 'Poetry and Politics', '2024-02-10', '2024-07-10', 6, 'Poetry', 22, 'An exploration of the relationship between poetry and political expression.'),
-(7, 'Romantic Poetry - Part II', '2024-03-01', '2024-08-01', 6, 'Poetry', 21, 'A module focusing on the poetry of the Romantic period, including works by Wordsworth and Keats.'),
-(7, 'Poetry of War', '2024-04-01', '2024-09-01', 6, 'Poetry', 23, 'A look at the portrayal of war in poetry, from ancient texts to contemporary works.'),
-(7, 'Narrative Poetry', '2024-05-01', '2024-10-01', 6, 'Poetry', 24, 'A course exploring narrative structures in poetry, including ballads and epics.'),
-(7, 'Poetry and Music', '2024-06-01', '2024-11-01', 6, 'Poetry', 25, 'A module examining the relationship between poetry and music in various cultures.'),
+(7, 'Modern Poetry', '2024-01-10', '2024-06-10',"5 Months", 'Poetry', 20, 'A study of modern poets such as W.B. Yeats, Sylvia Plath, and Langston Hughes.'),
+(7, 'Poetry and Politics', '2024-02-10', '2024-07-10',"5 Months", 'Poetry', 22, 'An exploration of the relationship between poetry and political expression.'),
+(7, 'Romantic Poetry - Part II', '2024-03-01', '2024-08-01',"5 Months", 'Poetry', 21, 'A module focusing on the poetry of the Romantic period, including works by Wordsworth and Keats.'),
+(7, 'Poetry of War', '2024-04-01', '2024-09-01',"5 Months", 'Poetry', 23, 'A look at the portrayal of war in poetry, from ancient texts to contemporary works.'),
+(7, 'Narrative Poetry', '2024-05-01', '2024-10-01',"5 Months", 'Poetry', 24, 'A course exploring narrative structures in poetry, including ballads and epics.'),
+(7, 'Poetry and Music', '2024-06-01', '2024-11-01',"5 Months", 'Poetry', 25, 'A module examining the relationship between poetry and music in various cultures.'),
 
-(8, 'General Chemistry', '2024-01-10', '2024-06-10', 6, 'Combined Science', 20, 'An introductory course covering the basics of chemical reactions, elements, and compounds.'),
-(8, 'Basic Physics', '2024-02-10', '2024-07-10', 6, 'Combined Science', 22, 'An introduction to the fundamental concepts of physics including motion, energy, and forces.'),
-(8, 'Biological Science', '2024-03-01', '2024-08-01', 6, 'Combined Science', 21, 'A foundational course on cell biology, genetics, and human anatomy.'),
-(8, 'Earth Science', '2024-04-01', '2024-09-01', 6, 'Combined Science', 23, 'An exploration of the Earth’s geology, oceans, and atmosphere.'),
-(8, 'Scientific Investigation', '2024-05-01', '2024-10-01', 6, 'Combined Science', 20, 'A module focused on scientific methods, experimental design, and data analysis.'),
-(8, 'Environmental Science', '2024-06-01', '2024-11-01', 6, 'Combined Science', 24, 'A course on ecosystems, biodiversity, and sustainability issues in the environment.'),
+(8, 'General Chemistry', '2024-01-10', '2024-06-10',"5 Months", 'Combined Science', 20, 'An introductory course covering the basics of chemical reactions, elements, and compounds.'),
+(8, 'Basic Physics', '2024-02-10', '2024-07-10',"5 Months", 'Combined Science', 22, 'An introduction to the fundamental concepts of physics including motion, energy, and forces.'),
+(8, 'Biological Science', '2024-03-01', '2024-08-01',"5 Months", 'Combined Science', 21, 'A foundational course on cell biology, genetics, and human anatomy.'),
+(8, 'Earth Science', '2024-04-01', '2024-09-01',"5 Months", 'Combined Science', 23, 'An exploration of the Earth’s geology, oceans, and atmosphere.'),
+(8, 'Scientific Investigation', '2024-05-01', '2024-10-01',"5 Months", 'Combined Science', 20, 'A module focused on scientific methods, experimental design, and data analysis.'),
+(8, 'Environmental Science', '2024-06-01', '2024-11-01',"5 Months", 'Combined Science', 24, 'A course on ecosystems, biodiversity, and sustainability issues in the environment.'),
 
 -- Physics
-(9, 'Mechanics', '2024-01-10', '2024-06-10', 6, 'Physics', 20, 'A course on classical mechanics, including motion, forces, and energy.'),
-(9, 'Electromagnetism', '2024-02-10', '2024-07-10', 6, 'Physics', 22, 'An introduction to electric fields, magnetic fields, and electromagnetism.'),
-(9, 'Thermodynamics', '2024-03-01', '2024-08-01', 6, 'Physics', 21, 'A module covering the laws of thermodynamics and their applications in physical systems.'),
-(9, 'Waves and Optics', '2024-04-01', '2024-09-01', 6, 'Physics', 23, 'A study of the properties of waves, including sound and light, and the nature of optical systems.'),
-(9, 'Quantum Mechanics', '2024-05-01', '2024-10-01', 6, 'Physics', 25, 'A course introducing the fundamental principles of quantum theory and its real-world applications.'),
-(9, 'Modern Physics', '2024-06-01', '2024-11-01', 6, 'Physics', 24, 'A course on the theory and applications of special relativity and quantum mechanics.'),
+(9, 'Mechanics', '2024-01-10', '2024-06-10',"5 Months", 'Physics', 20, 'A course on classical mechanics, including motion, forces, and energy.'),
+(9, 'Electromagnetism', '2024-02-10', '2024-07-10',"5 Months", 'Physics', 22, 'An introduction to electric fields, magnetic fields, and electromagnetism.'),
+(9, 'Thermodynamics', '2024-03-01', '2024-08-01',"5 Months", 'Physics', 21, 'A module covering the laws of thermodynamics and their applications in physical systems.'),
+(9, 'Waves and Optics', '2024-04-01', '2024-09-01',"5 Months", 'Physics', 23, 'A study of the properties of waves, including sound and light, and the nature of optical systems.'),
+(9, 'Quantum Mechanics', '2024-05-01', '2024-10-01',"5 Months", 'Physics', 25, 'A course introducing the fundamental principles of quantum theory and its real-world applications.'),
+(9, 'Modern Physics', '2024-06-01', '2024-11-01',"5 Months", 'Physics', 24, 'A course on the theory and applications of special relativity and quantum mechanics.'),
 
 -- Biology
-(10, 'Cell Biology', '2024-01-10', '2024-06-10', 6, 'Biology', 20, 'A module covering the structure and function of cells, including cell division and organelles.'),
-(10, 'Genetics and Evolution', '2024-02-10', '2024-07-10', 6, 'Biology', 22, 'A course on inheritance patterns, genetic disorders, and the principles of evolution.'),
-(10, 'Human Anatomy', '2024-03-01', '2024-08-01', 6, 'Biology', 21, 'An introduction to the human body, including organ systems, tissues, and their functions.'),
-(10, 'Ecology and Conservation', '2024-04-01', '2024-09-01', 6, 'Biology', 23, 'A study of ecosystems, biodiversity, and conservation efforts to protect endangered species.'),
-(10, 'Microbiology', '2024-05-01', '2024-10-01', 6, 'Biology', 20, 'A course on microorganisms, including bacteria, viruses, and fungi, and their impact on health.'),
-(10, 'Plant Biology', '2024-06-01', '2024-11-01', 6, 'Biology', 24, 'A module focusing on plant structure, photosynthesis, and plant reproduction.'),
+(10, 'Cell Biology', '2024-01-10', '2024-06-10',"5 Months", 'Biology', 20, 'A module covering the structure and function of cells, including cell division and organelles.'),
+(10, 'Genetics and Evolution', '2024-02-10', '2024-07-10',"5 Months", 'Biology', 22, 'A course on inheritance patterns, genetic disorders, and the principles of evolution.'),
+(10, 'Human Anatomy', '2024-03-01', '2024-08-01',"5 Months", 'Biology', 21, 'An introduction to the human body, including organ systems, tissues, and their functions.'),
+(10, 'Ecology and Conservation', '2024-04-01', '2024-09-01',"5 Months", 'Biology', 23, 'A study of ecosystems, biodiversity, and conservation efforts to protect endangered species.'),
+(10, 'Microbiology', '2024-05-01', '2024-10-01',"5 Months", 'Biology', 20, 'A course on microorganisms, including bacteria, viruses, and fungi, and their impact on health.'),
+(10, 'Plant Biology', '2024-06-01', '2024-11-01',"5 Months", 'Biology', 24, 'A module focusing on plant structure, photosynthesis, and plant reproduction.'),
 
 -- Chemistry
-(11, 'Organic Chemistry', '2024-01-10', '2024-06-10', 6, 'Chemistry', 20, 'A study of carbon-based compounds, focusing on functional groups and reaction mechanisms.'),
-(11, 'Inorganic Chemistry', '2024-02-10', '2024-07-10', 6, 'Chemistry', 22, 'An introduction to non-carbon chemistry, including periodic table trends and inorganic compounds.'),
-(11, 'Physical Chemistry', '2024-03-01', '2024-08-01', 6, 'Chemistry', 21, 'A course on the principles of thermodynamics, kinetics, and chemical equilibria.'),
-(11, 'Analytical Chemistry', '2024-04-01', '2024-09-01', 6, 'Chemistry', 23, 'A module on techniques and methods for analyzing chemical substances.'),
-(11, 'Biochemistry', '2024-05-01', '2024-10-01', 6, 'Chemistry', 25, 'A course that explores the chemistry of biological molecules and biochemical reactions.'),
-(11, 'Environmental Chemistry', '2024-06-01', '2024-11-01', 6, 'Chemistry', 24, 'A study of the role of chemistry in environmental issues such as pollution and sustainability.'),
+(11, 'Organic Chemistry', '2024-01-10', '2024-06-10',"5 Months", 'Chemistry', 20, 'A study of carbon-based compounds, focusing on functional groups and reaction mechanisms.'),
+(11, 'Inorganic Chemistry', '2024-02-10', '2024-07-10',"5 Months", 'Chemistry', 22, 'An introduction to non-carbon chemistry, including periodic table trends and inorganic compounds.'),
+(11, 'Physical Chemistry', '2024-03-01', '2024-08-01',"5 Months", 'Chemistry', 21, 'A course on the principles of thermodynamics, kinetics, and chemical equilibria.'),
+(11, 'Analytical Chemistry', '2024-04-01', '2024-09-01',"5 Months", 'Chemistry', 23, 'A module on techniques and methods for analyzing chemical substances.'),
+(11, 'Biochemistry', '2024-05-01', '2024-10-01',"5 Months", 'Chemistry', 25, 'A course that explores the chemistry of biological molecules and biochemical reactions.'),
+(11, 'Environmental Chemistry', '2024-06-01', '2024-11-01',"5 Months", 'Chemistry', 24, 'A study of the role of chemistry in environmental issues such as pollution and sustainability.'),
 
 -- History
-(12, 'Ancient Civilizations', '2024-01-10', '2024-06-10', 6, 'History', 20, 'A module focusing on early human societies and their contributions to civilization.'),
-(12, 'Medieval History', '2024-02-10', '2024-07-10', 6, 'History', 22, 'An exploration of the Middle Ages, covering feudalism, religion, and major conflicts.'),
-(12, 'Modern European History', '2024-03-01', '2024-08-01', 6, 'History', 21, 'A study of European history from the Renaissance to the present day.'),
-(12, 'World Wars', '2024-04-01', '2024-09-01', 6, 'History', 23, 'A detailed analysis of the causes, events, and aftermath of World War I and II.'),
-(12, 'History of the Americas', '2024-05-01', '2024-10-01', 6, 'History', 24, 'A course on the political, social, and economic history of North and South America.'),
-(12, 'The Cold War', '2024-06-01', '2024-11-01', 6, 'History', 25, 'An in-depth study of the political, military, and ideological conflict between the United States and the Soviet Union.'),
+(12, 'Ancient Civilizations', '2024-01-10', '2024-06-10',"5 Months", 'History', 20, 'A module focusing on early human societies and their contributions to civilization.'),
+(12, 'Medieval History', '2024-02-10', '2024-07-10',"5 Months", 'History', 22, 'An exploration of the Middle Ages, covering feudalism, religion, and major conflicts.'),
+(12, 'Modern European History', '2024-03-01', '2024-08-01',"5 Months", 'History', 21, 'A study of European history from the Renaissance to the present day.'),
+(12, 'World Wars', '2024-04-01', '2024-09-01',"5 Months", 'History', 23, 'A detailed analysis of the causes, events, and aftermath of World War I and II.'),
+(12, 'History of the Americas', '2024-05-01', '2024-10-01',"5 Months", 'History', 24, 'A course on the political, social, and economic history of North and South America.'),
+(12, 'The Cold War', '2024-06-01', '2024-11-01',"5 Months", 'History', 25, 'An in-depth study of the political, military, and ideological conflict between the United States and the Soviet Union.'),
 
 -- Geography
-(13, 'Physical Geography', '2024-01-10', '2024-06-10', 6, 'Geography', 20, 'An introduction to the physical features of the Earth, including landforms and weather patterns.'),
-(13, 'Human Geography', '2024-02-10', '2024-07-10', 6, 'Geography', 22, 'A study of human societies and their relationship with the environment.'),
-(13, 'Urban Geography', '2024-03-01', '2024-08-01', 6, 'Geography', 21, 'A module focused on the growth and development of cities, including urban planning.'),
-(13, 'Geographic Information Systems', '2024-04-01', '2024-09-01', 6, 'Geography', 23, 'An introduction to GIS technology and its applications in mapping and data analysis.'),
-(13, 'Environmental Geography', '2024-05-01', '2024-10-01', 6, 'Geography', 24, 'A course on the human impact on the environment, including deforestation and climate change.'),
-(13, 'Climatology', '2024-06-01', '2024-11-01', 6, 'Geography', 25, 'A module on the study of climates and the factors that influence weather patterns.'),
+(13, 'Physical Geography', '2024-01-10', '2024-06-10',"5 Months", 'Geography', 20, 'An introduction to the physical features of the Earth, including landforms and weather patterns.'),
+(13, 'Human Geography', '2024-02-10', '2024-07-10',"5 Months", 'Geography', 22, 'A study of human societies and their relationship with the environment.'),
+(13, 'Urban Geography', '2024-03-01', '2024-08-01',"5 Months", 'Geography', 21, 'A module focused on the growth and development of cities, including urban planning.'),
+(13, 'Geographic Information Systems', '2024-04-01', '2024-09-01',"5 Months", 'Geography', 23, 'An introduction to GIS technology and its applications in mapping and data analysis.'),
+(13, 'Environmental Geography', '2024-05-01', '2024-10-01',"5 Months", 'Geography', 24, 'A course on the human impact on the environment, including deforestation and climate change.'),
+(13, 'Climatology', '2024-06-01', '2024-11-01',"5 Months", 'Geography', 25, 'A module on the study of climates and the factors that influence weather patterns.'),
 
 -- Religious Studies
-(14, 'World Religions', '2024-01-10', '2024-06-10', 6, 'Religious Studies', 20, 'A module on the major world religions, including Christianity, Islam, Hinduism, and Buddhism.'),
-(14, 'Ethics and Morality', '2024-02-10', '2024-07-10', 6, 'Religious Studies', 22, 'An exploration of ethical issues from a religious perspective.'),
-(14, 'Philosophy of Religion', '2024-03-01', '2024-08-01', 6, 'Religious Studies', 21, 'A study of philosophical arguments for and against the existence of God.'),
-(14, 'Religious Texts', '2024-04-01', '2024-09-01', 6, 'Religious Studies', 23, 'A detailed study of sacred texts such as the Bible, Quran, and Bhagavad Gita.'),
-(14, 'Theology', '2024-05-01', '2024-10-01', 6, 'Religious Studies', 24, 'A course on the systematic study of the nature of the divine and religious beliefs.'),
-(14, 'Religion and Society', '2024-06-01', '2024-11-01', 6, 'Religious Studies', 25, 'An exploration of the relationship between religion and social issues such as gender, politics, and conflict.'),
+(14, 'World Religions', '2024-01-10', '2024-06-10',"5 Months", 'Religious Studies', 20, 'A module on the major world religions, including Christianity, Islam, Hinduism, and Buddhism.'),
+(14, 'Ethics and Morality', '2024-02-10', '2024-07-10',"5 Months", 'Religious Studies', 22, 'An exploration of ethical issues from a religious perspective.'),
+(14, 'Philosophy of Religion', '2024-03-01', '2024-08-01',"5 Months", 'Religious Studies', 21, 'A study of philosophical arguments for and against the existence of God.'),
+(14, 'Religious Texts', '2024-04-01', '2024-09-01',"5 Months", 'Religious Studies', 23, 'A detailed study of sacred texts such as the Bible, Quran, and Bhagavad Gita.'),
+(14, 'Theology', '2024-05-01', '2024-10-01',"5 Months", 'Religious Studies', 24, 'A course on the systematic study of the nature of the divine and religious beliefs.'),
+(14, 'Religion and Society', '2024-06-01', '2024-11-01',"5 Months", 'Religious Studies', 25, 'An exploration of the relationship between religion and social issues such as gender, politics, and conflict.'),
 
 -- Criminology
-(15, 'Introduction to Criminology', '2024-01-10', '2024-06-10', 6, 'Criminology', 20, 'An introductory course covering the basic concepts of criminology and criminal justice.'),
-(15, 'Criminal Law', '2024-02-10', '2024-07-10', 6, 'Criminology', 22, 'A study of criminal law, including types of crimes and their legal consequences.'),
-(15, 'Social Control and Deviance', '2024-03-01', '2024-08-01', 6, 'Criminology', 21, 'An exploration of social control mechanisms and the concept of deviance in society.'),
-(15, 'Penology', '2024-04-01', '2024-09-01', 6, 'Criminology', 23, 'A course on punishment and rehabilitation in the criminal justice system.'),
-(15, 'Criminal Profiling', '2024-05-01', '2024-10-01', 6, 'Criminology', 24, 'A study of the techniques used in criminal profiling to understand and catch offenders.'),
-(15, 'Crime and Society', '2024-06-01', '2024-11-01', 6, 'Criminology', 25, 'A course exploring the social factors contributing to crime and the impact on society.');
+(15, 'Introduction to Criminology', '2024-01-10', '2024-06-10',"5 Months", 'Criminology', 20, 'An introductory course covering the basic concepts of criminology and criminal justice.'),
+(15, 'Criminal Law', '2024-02-10', '2024-07-10',"5 Months", 'Criminology', 22, 'A study of criminal law, including types of crimes and their legal consequences.'),
+(15, 'Social Control and Deviance', '2024-03-01', '2024-08-01',"5 Months", 'Criminology', 21, 'An exploration of social control mechanisms and the concept of deviance in society.'),
+(15, 'Penology', '2024-04-01', '2024-09-01',"5 Months", 'Criminology', 23, 'A course on punishment and rehabilitation in the criminal justice system.'),
+(15, 'Criminal Profiling', '2024-05-01', '2024-10-01',"5 Months", 'Criminology', 24, 'A study of the techniques used in criminal profiling to understand and catch offenders.'),
+(15, 'Crime and Society', '2024-06-01', '2024-11-01',"5 Months", 'Criminology', 25, 'A course exploring the social factors contributing to crime and the impact on society.');
 
 
 
@@ -889,6 +895,21 @@ ORDER BY
 
 SELECT * FROM StudentEngagement;
 
+CREATE VIEW ModuleDuration AS 
+SELECT
+    c.name AS "Course",
+    b.name AS "Branch",
+    m.name AS "Module",
+    m.subject_area AS "Subject",
+    AGE(m.end_date, m.start_date) AS "Duration"
+FROM
+    course c
+JOIN
+    branch b ON b.branch_id = c.branch_id
+JOIN 
+    module m ON c.course_id = m.module_id
+ORDER BY
+    b.name, m.name, "Duration";
 
 SELECT 
     s.session_id AS "Session ID",
@@ -911,6 +932,8 @@ GROUP BY
     s.session_id
 ORDER BY
     "Average Rating" DESC;
+
+
 
 
 --SELECT
@@ -952,7 +975,7 @@ GRANT SELECT, UPDATE ON course TO module_leader;
 GRANT SELECT ON session TO module_leader;
 GRANT SELECT, UPDATE ON staff_assignments TO module_leader; 
 
--- Grant permissions for lectureres and staff
+-- Grant permissions for lecturers and staff
 GRANT SELECT, UPDATE ON session TO lecturer;
 GRANT SELECT, UPDATE ON feedback TO lecturer;
 GRANT SELECT ON student_feedback TO lecturer;
@@ -966,27 +989,87 @@ GRANT SELECT ON student_feedback TO staff;
 GRANT SELECT ON session TO student;
 GRANT SELECT ON course TO student;
 GRANT SELECT ON feedback TO student;
-GRANT INSERT ON student_feedback TO student;  
+GRANT INSERT ON student_feedback TO student;
 
 --Staff assignments control--
 GRANT SELECT, UPDATE, DELETE ON staff_assignments TO branch_manager;
 
 
--- -------------------------
+-- ------------------
 -- Functions Library
--- -------------------------
+-- ------------------
 
--- create duration field using update on functions
-CREATE OR REPLACE FUNCTION duration_date(start_date, end_date)
-   RETURNS DATE
+-- create duration for dates using update on functions (needs testing) (will finish in the morning am knackered)
+CREATE OR REPLACE FUNCTION update_duration_date()
+   RETURNS TRIGGER 
    LANGUAGE plpgsql
   AS
 $$
 BEGIN
-    -- returns calculated difference between dates (duration)
-    RETURN end_date - start_date;
-
+    NEW.duration = concat(EXTRACT(DAY FROM NEW.end_date - NEW.start_date), ' ', 'Days Remaining');
+    RETURN NEW;
 END;
 $$;
 
--- attending within room will use function to select student_id where 
+CREATE TRIGGER update_duration_dates_tg 
+AFTER INSERT OR UPDATE OF start_date, end_date
+ON module
+FOR EACH ROW
+EXECUTE PROCEDURE update_duration_date();
+-- Testing func:
+-- When start_date < end_date
+
+
+-- attending within room will use function to select all relevant student_id's and aggregate them
+-- create get_register function that lists all
+
+/*
+-- testing duration column --
+CREATE TABLE module (
+    module_id SERIAL PRIMARY KEY NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    duration TEXT    
+);
+
+CREATE OR REPLACE FUNCTION update_duration_date()
+   RETURNS TRIGGER 
+   LANGUAGE plpgsql
+  AS
+$$
+BEGIN
+    NEW.duration = concat(
+        EXTRACT(MONTH FROM (NEW.end_date - NEW.start_date)),
+        EXTRACT(DAY FROM (NEW.end_date - NEW.start_date))
+    );
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER update_duration_dates_tg 
+BEFORE INSERT OR UPDATE OF start_date, end_date
+ON module
+FOR EACH ROW
+EXECUTE PROCEDURE update_duration_date();
+
+INSERT INTO module (start_date, end_date)
+VALUES
+('2024-01-10', '2024-06-10'),
+('2024-02-15', '2024-07-15'),
+('2024-03-01', '2024-08-01'),
+('2024-04-01', '2024-09-01'),
+('2024-05-10', '2024-10-10'),
+('2024-06-15', '2024-11-15'),
+
+-- Applied Mathematics
+('2024-02-10', '2024-07-10'),
+('2024-03-01', '2024-08-01'),
+('2024-04-05', '2024-09-05'),
+('2024-05-01', '2024-10-01'),
+('2024-06-01', '2024-11-01'),
+('2024-07-01', '2024-12-01');
+
+INSERT INTO module (start_date, end_date)
+VALUES
+('2024-10-18', '2024-12-18');
+*/
