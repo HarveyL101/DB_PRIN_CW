@@ -127,6 +127,15 @@ CREATE TABLE module (
     UNIQUE (name)
 );
 
+-- -------------------------------
+-- Table structure for student_module
+-- -------------------------------
+CREATE TABLE student_module (
+    student_id INT NOT NULL,
+    module_id INT NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE,
+    FOREIGN KEY (module_id) REFERENCES module (module_id) ON DELETE CASCADE
+);
 -- -------------------------------------
 -- Table structure for emergency_contact
 -- -------------------------------------
@@ -188,7 +197,6 @@ CREATE TABLE feedback (
 CREATE TABLE student_feedback (
     feedback_id INT NOT NULL,
     student_id INT NOT NULL,
-    --PRIMARY KEY (feedback_id, student_id),
     FOREIGN KEY (feedback_id) REFERENCES feedback (feedback_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE
 );
@@ -593,7 +601,78 @@ VALUES
 (15, 'Criminal Profiling', '2024-05-01', '2024-10-01','5 Months', 'Criminology', 24, 'A study of the techniques used in criminal profiling to understand and catch offenders.'),
 (15, 'Crime and Society', '2024-06-01', '2024-11-01','5 Months', 'Criminology', 25, 'A course exploring the social factors contributing to crime and the impact on society.');
 
-
+INSERT INTO student_module (student_id, module_id) 
+VALUES 
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),
+    (9, 9),
+    (10, 10),
+    (11, 11),
+    (12, 12),
+    (13, 13),
+    (14, 14),
+    (15, 15),
+    (16, 16),
+    (17, 17),
+    (18, 18),
+    (19, 19),
+    (20, 20),
+    (21, 21),
+    (22, 22),
+    (23, 23),
+    (24, 24),
+    (25, 25),
+    (26, 26),
+    (27, 27),
+    (28, 28),
+    (29, 29),
+    (30, 30),
+    (31, 1),
+    (32, 2),
+    (33, 3),
+    (34, 4),
+    (35, 5),
+    (36, 6),
+    (37, 7),
+    (38, 8),
+    (39, 9),
+    (40, 10),
+    (41, 11),
+    (42, 12),
+    (43, 13),
+    (44, 14),
+    (45, 15),
+    (46, 16),
+    (47, 17),
+    (48, 18),
+    (49, 19),
+    (50, 20),
+    (51, 21),
+    (52, 22),
+    (53, 23),
+    (54, 24),
+    (55, 25),
+    (56, 26),
+    (57, 27),
+    (58, 28),
+    (59, 29),
+    (60, 30),
+    (61, 1),
+    (62, 2),
+    (63, 3),
+    (64, 4),
+    (65, 5),
+    (66, 6),
+    (67, 7),
+    (68, 8),
+    (69, 9),
+    (70, 10);
 
 INSERT INTO emergency_contact (student_id, full_name, relationship, phone, email)
 VALUES
@@ -805,7 +884,7 @@ VALUES
 ('Excellent', 'Very enjoyable session, with great examples and interaction with the class.', 44),
 ('Good', 'Good content, but I feel like it could have been covered more thoroughly.', 45);
 
----INSERT FOR STUDENT_FEEDBACK needed---
+---INSERT FOR STUDENT_FEEDBACK---
 INSERT INTO student_feedback (feedback_id, student_id)
 VALUES
     (1, 1),   
@@ -873,12 +952,10 @@ JOIN
     feedback f ON s.session_id = f.session_id
 WHERE
     f.rating = 'Excellent';
-
-SELECT * FROM TopRatedSessions;
 --This query is used to see the best rated sessions and relevant information for those sessions--
 
 
-CREATE VIEW StudentEngagement AS
+CREATE VIEW StudentAttendance AS
 SELECT 
     st.student_id AS "Student ID",
     CONCAT(st.name, ' ', st.lname) AS "Student Name",
@@ -891,8 +968,6 @@ GROUP BY
     st.student_id
 ORDER BY 
     "Sessions Attended" DESC;
-
-SELECT * FROM StudentEngagement;
 
 CREATE VIEW ModuleDuration AS 
 SELECT
@@ -910,18 +985,19 @@ JOIN
 ORDER BY
     b.name, m.name, "Duration";
 
-CREATE VIEW StudentAttendance AS 
+
+CREATE VIEW StudentAttainment AS 
 SELECT 
     s.session_id AS "Session ID",
-    COUNT(DISTINCT sf.student_id) AS "Attendance",
+    COUNT(DISTINCT sf.student_id) AS "Attainment",
     COUNT(f.feedback_id) AS "Total Feedback",
-    AVG(CASE 
+    ROUND(AVG(CASE 
             WHEN f.rating = 'Excellent' THEN 4.0
             WHEN f.rating = 'Good' THEN 3.0
             WHEN f.rating = 'Average' THEN 2.0
             WHEN f.rating = 'Poor' THEN 1.0
             ELSE 0
-        END) AS "Average Rating"
+        END), 2) AS "Average Rating"
 FROM 
     session s
 LEFT JOIN 
@@ -932,9 +1008,6 @@ GROUP BY
     s.session_id
 ORDER BY
     "Average Rating" DESC;
-
-
-
 
 --SELECT
 --    s.session_id,
@@ -999,79 +1072,16 @@ GRANT SELECT, UPDATE, DELETE ON staff_assignments TO branch_manager;
 -- Functions Library
 -- ------------------
 
--- create duration for dates using update on functions (needs testing) (will finish in the morning am knackered)
-/*
-CREATE OR REPLACE FUNCTION update_duration_date()
-   RETURNS TRIGGER 
+CREATE OR REPLACE FUNCTION add_student_to_module(student_id INT, module_id INT)
+   RETURNS VOID 
    LANGUAGE plpgsql
   AS
 $$
 BEGIN
-    NEW.duration = concat(EXTRACT(DAY FROM NEW.end_date - NEW.start_date), ' ', 'Days Remaining');
-    RETURN NEW;
+    INSERT INTO student_module (student_id, module_id)
+    VALUES (student_id, module_id);
 END;
 $$;
 
-CREATE TRIGGER update_duration_dates_tg 
-AFTER INSERT OR UPDATE OF start_date, end_date
-ON module
-FOR EACH ROW
-EXECUTE PROCEDURE update_duration_date();
-*/
--- Testing func:
--- When start_date < end_date
-
-
--- attending within room will use function to select all relevant student_id's and aggregate them
--- create get_register function that lists all
-
-/*
--- testing duration column --
-CREATE TABLE module (
-    module_id SERIAL PRIMARY KEY NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    duration TEXT    
-);
-
-CREATE OR REPLACE FUNCTION update_duration_date()
-   RETURNS TRIGGER 
-   LANGUAGE plpgsql
-  AS
-$$
-BEGIN
-    NEW.duration = concat(
-        EXTRACT(MONTH FROM (NEW.end_date - NEW.start_date)),
-        EXTRACT(DAY FROM (NEW.end_date - NEW.start_date))
-    );
-    RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER update_duration_dates_tg 
-BEFORE INSERT OR UPDATE OF start_date, end_date
-ON module
-FOR EACH ROW
-EXECUTE PROCEDURE update_duration_date();
-
-INSERT INTO module (start_date, end_date)
-VALUES
-('2024-01-10', '2024-06-10'),
-('2024-02-15', '2024-07-15'),
-('2024-03-01', '2024-08-01'),
-('2024-04-01', '2024-09-01'),
-('2024-05-10', '2024-10-10'),
-('2024-06-15', '2024-11-15'),
-
--- Applied Mathematics
-('2024-02-10', '2024-07-10'),
-('2024-03-01', '2024-08-01'),
-('2024-04-05', '2024-09-05'),
-('2024-05-01', '2024-10-01'),
-('2024-06-01', '2024-11-01'),
-('2024-07-01', '2024-12-01');
-
-INSERT INTO module (start_date, end_date)
-VALUES
-('2024-10-18', '2024-12-18');
-*/
+SELECT COUNT(*)
+FROM student;
