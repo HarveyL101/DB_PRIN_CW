@@ -1082,6 +1082,3 @@ BEGIN
     VALUES (student_id, module_id);
 END;
 $$;
-
-SELECT COUNT(*)
-FROM student;
